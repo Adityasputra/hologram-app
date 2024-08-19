@@ -1,5 +1,6 @@
 const typeDefs = `#graphql
     type User {
+        _id: ID
         name: String
         username: String!
         email: String!
@@ -7,7 +8,9 @@ const typeDefs = `#graphql
     }
 
     type Query {
-        Users: [User]
+        users: [User]
+        user(id: ID): User
     }
 `;
 
+module.exports = typeDefs;
