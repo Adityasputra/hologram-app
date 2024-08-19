@@ -31,6 +31,20 @@ const resolvers = {
       return user;
     },
   },
+
+  Mutation: {
+    reqUser: async (_, args, contextValue) => {
+      const { newUser } = args;
+      if (!newUser) {
+        throw new GraphQLError("Invalid Email/Password", {
+          extensions: {
+            code: "BAD_USER_INPUT",
+          },
+        });
+      }
+      return newUser;
+    },
+  },
 };
 
 module.exports = resolvers;

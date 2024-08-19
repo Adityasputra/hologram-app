@@ -1,6 +1,21 @@
 const { GraphQLError } = require("graphql");
-const { Query } = require("./user");
+const { ObjectId } = require("mongodb");
 
 const resolvers = {
-    Query
-}
+  Mutation: {
+    createPost: (
+      _,
+      { content, tags, imgUrl, authorId, createdAt, updatedAt }
+    ) => {
+      const newPost = {
+        _id: new ObjectId(),
+        content,
+        tags,
+        imgUrl,
+        authorId,
+        createdAt,
+        updatedAt,
+      };
+    },
+  },
+};
