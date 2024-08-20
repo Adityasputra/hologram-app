@@ -1,15 +1,14 @@
 const typeDefs = `#graphql
     type User {
-        _id: ID
+        _id: ID!
         name: String
         username: String!
         email: String!
-        password: String!
     }
 
     type Query {
         users: [User]
-        user(id: ID): User
+        user(id: ID!): User
     }
 
     input Register {
@@ -20,7 +19,7 @@ const typeDefs = `#graphql
     }
 
     type Mutation {
-        regUser(register: Register): User
+        regUser(register: Register!): User
     }
 `;
 

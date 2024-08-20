@@ -1,6 +1,8 @@
 const { GraphQLError } = require("graphql");
+const { hashPassword } = require("../helpers/bcrytp");
+const { ObjectId } = require("mongodb");
 
-const userData = [
+let userData = [
   {
     _id: "1",
     name: "Mumei",
@@ -20,9 +22,8 @@ const userData = [
 const resolvers = {
   Query: {
     users: () => userData,
-    user: async (_, args) => {
-      const { id } = args;
-      const user = userData.find((u) => u._id === id);
+    user: async (_, { id }) => {
+      const user = userData.find((e) => e._id === id);
       if (!user) {
         throw new GraphQLError("User not found", {
           extensions: { code: "USER_NOT_FOUND" },
@@ -33,16 +34,39 @@ const resolvers = {
   },
 
   Mutation: {
-    reqUser: async (_, args, contextValue) => {
-      const { newUser } = args;
-      if (!newUser) {
-        throw new GraphQLError("Invalid Email/Password", {
-          extensions: {
-            code: "BAD_USER_INPUT",
-          },
+    regUser: async (_, { register }) => {
+      const { name, username, email, password } = register;
+      const checkName = userData.find((user) => user.username === username);
+      if (checkName) {
+        throw new GraphQLError("Username already in use", {
+          extensions: { code: "USERNAME_ALREADY_TAKEN" },
         });
       }
-      return newUser;
+
+      const checkEmail = userData.find((user) => user.email === email);
+      if (checkEmail) {
+        throw new GraphQLError("Email already in use", {
+          extensions: { code: "EMAIL_ALREADY_TAKEN" },
+        });
+      }
+
+      const hashedPassword = await hashPassword(password);
+      const newUser = {
+        _id: new ObjectId(),
+        name,
+        username,
+        email,
+        password: hashedPassword,
+      };
+
+      userData.push(newUser);
+
+      return {
+        _id: newUser._id,
+        name: newUser.name,
+        username: newUser.username,
+        email: newUser.email,
+      };
     },
   },
 };

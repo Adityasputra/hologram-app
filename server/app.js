@@ -1,10 +1,10 @@
 const { ApolloServer } = require("@apollo/server");
 const { startStandaloneServer } = require("@apollo/server/standalone");
+const { connect, getDB } = require("./config/connect");
 
 // User Schema
 const userResolvers = require("./resolvers/user");
 const userTypeDefs = require("./schema/user");
-const { connect, getDB } = require("./config/connect");
 
 // Post Schema
 // const postResolvers = require();
