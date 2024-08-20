@@ -4,7 +4,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const generateToken = async (user) => {
   return jwt.sign(
     {
-      id: user.id,
+      _id: user.id,
       nama: user.name,
       username: user.username,
       email: user.email,
