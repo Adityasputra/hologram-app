@@ -1,49 +1,44 @@
 const { GraphQLError } = require("graphql");
-const { hashPassword } = require("../helpers/bcrytp");
+const { hashPassword, comparedPassword } = require("../helpers/bcrytp");
 const { ObjectId } = require("mongodb");
-
-let userData = [
-  {
-    _id: "1",
-    name: "Mumei",
-    username: "Nanashi Mumei",
-    email: "moom@mail.com",
-    password: "moom123",
-  },
-  {
-    _id: "2",
-    name: "Roara",
-    username: "Roara Panthera",
-    email: "raora@mail.com",
-    password: "roara123",
-  },
-];
+const { verifyToken, signInToken } = require("../helpers/tokenGenerate");
 
 const resolvers = {
   Query: {
-    users: () => userData,
-    user: async (_, { id }) => {
-      const user = userData.find((e) => e._id === id);
+    users: async (_, __, { db }) => {
+      return await db.collection("users").find().toArray();
+    },
+    user: async (_, { id }, { db }) => {
+      const user = await db
+        .collection("users")
+        .findOne({ _id: new ObjectId(id) });
       if (!user) {
         throw new GraphQLError("User not found", {
           extensions: { code: "USER_NOT_FOUND" },
         });
       }
-      return user;
+      return {
+        _id: user._id,
+        name: user.name,
+        username: user.username,
+        email: user.email,
+      };
     },
   },
 
   Mutation: {
-    regUser: async (_, { register }) => {
+    regUser: async (_, { register }, { db, authentication }) => {
       const { name, username, email, password } = register;
-      const checkName = userData.find((user) => user.username === username);
-      if (checkName) {
+      const user = await authentication();
+
+      const checkUsername = await db.collection("users").findOne({ username });
+      if (checkUsername) {
         throw new GraphQLError("Username already in use", {
           extensions: { code: "USERNAME_ALREADY_TAKEN" },
         });
       }
 
-      const checkEmail = userData.find((user) => user.email === email);
+      const checkEmail = await db.collection("users").findOne({ email });
       if (checkEmail) {
         throw new GraphQLError("Email already in use", {
           extensions: { code: "EMAIL_ALREADY_TAKEN" },
@@ -59,13 +54,46 @@ const resolvers = {
         password: hashedPassword,
       };
 
-      userData.push(newUser);
+      await db.collection("users").insertOne(newUser);
 
       return {
         _id: newUser._id,
-        name: newUser.name,
-        username: newUser.username,
-        email: newUser.email,
+        name,
+        username,
+        email,
+      };
+    },
+
+    logUser: async (_, { login }, { db }) => {
+      const { email, password } = login;
+
+      const user = await db.collection("users").findOne({ email });
+      if (!user) {
+        throw new GraphQLError("User not found", {
+          extensions: { code: "USER_NOT_FOUND" },
+        });
+      }
+
+      const validPassword = await comparedPassword(password, user.password);
+      if (!validPassword) {
+        throw new GraphQLError("Invalid Credentials", {
+          extensions: { code: "INVALID_CREDENTIALS" },
+        });
+      }
+
+      const token = signInToken({
+        id: user._id,
+        username: user.username,
+      });
+
+      return {
+        user: {
+          _id: user._id,
+          name: user.name,
+          username: user.username,
+          email: user.email,
+        },
+        token,
       };
     },
   },

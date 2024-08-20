@@ -1,10 +1,12 @@
 const { ApolloServer } = require("@apollo/server");
 const { startStandaloneServer } = require("@apollo/server/standalone");
 const { connect, getDB } = require("./config/connect");
+require("dotenv").config();
 
 // User Schema
 const userResolvers = require("./resolvers/user");
 const userTypeDefs = require("./schema/user");
+const authentication = require("./middlewares/auth");
 
 // Post Schema
 // const postResolvers = require();
@@ -29,6 +31,7 @@ const server = new ApolloServer({
       context: ({ req, res }) => {
         return {
           db,
+          authentication: async () => await authentication(req),
         };
       },
     });

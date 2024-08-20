@@ -1,22 +1,21 @@
 const { GraphQLError } = require("graphql");
 const { verifyToken } = require("../helpers/tokenGenerate");
-
-const authentication = () => {
+const { getDB, connect } = require("../config/connect");
+const authentication = async (req) => {
   try {
-    if (req.headers.authorization) {
-      const token = req.headers.authorization.split(" ")[1];
-      const verify = verifyToken(token);
-
-      if (!verify) {
-        throw new GraphQLError("Invalid Token", {
-          extensions: { code: "UNAUTHENTICATED" },
-        });
-      }
+    const db = await getDB();
+    const token = req.headers.authorization.split(" ")[1];
+    const verifyTkn = verifyToken(token);
+    if (!verifyTkn) {
+      throw new GraphQLError("Invalid Token", {
+        extensions: { code: "UNAUTHENTICATED" },
+      });
     }
-
-
-    // return { req.user : }
+    const user = await db.collection("users").findOne({ _id: verifyTkn.id });
+    return { id: user._id };
   } catch (error) {
     console.log("Error", error);
   }
 };
+
+module.exports = authentication;

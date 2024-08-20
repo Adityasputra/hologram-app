@@ -18,8 +18,19 @@ const typeDefs = `#graphql
         password: String!
     }
 
+     type LoginRes {
+        user: User
+        token: String!
+    }
+
+    input Login {
+        email: String!
+        password: String!
+    }
+
     type Mutation {
         regUser(register: Register!): User
+        logUser(login: Login!): LoginRes
     }
 `;
 
