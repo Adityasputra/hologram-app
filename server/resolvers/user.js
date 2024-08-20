@@ -27,9 +27,8 @@ const resolvers = {
   },
 
   Mutation: {
-    regUser: async (_, { register }, { db, authentication }) => {
+    regUser: async (_, { register }, { db }) => {
       const { name, username, email, password } = register;
-      const user = await authentication();
 
       const checkUsername = await db.collection("users").findOne({ username });
       if (checkUsername) {
