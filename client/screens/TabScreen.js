@@ -4,6 +4,8 @@ import { Image } from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import HomeScreen from "./HomeScreen";
 import ProfileScreen from "./ProfileScreen";
+import AddPostScreen from "./AddPostScreen";
+import PostDetailScreen from "./PostDetailsScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -20,6 +22,22 @@ export default function TabScreen() {
               style={{ width: 24, height: 24 }}
               source={{
                 uri: "https://img.icons8.com/?size=100&id=i6fZC6wuprSu&format=png&color=000000",
+              }}
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Post Detail"
+        component={PostDetailScreen}
+        options={{
+          tabBarShowLabel: false,
+          tabBarHideOnKeyboard: true,
+          tabBarIcon: () => (
+            <Image
+              style={{ width: 24, height: 24 }}
+              source={{
+                uri: "https://img.icons8.com/?size=100&id=84991&format=png&color=000000",
               }}
             />
           ),
