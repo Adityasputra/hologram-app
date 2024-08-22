@@ -1,37 +1,39 @@
-import { useNavigation } from "@react-navigation/native";
 import {
   StyleSheet,
   Text,
   View,
-  Image,
   TextInput,
   Pressable,
   TouchableHighlight,
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
-export default function LoginScreen() {
-//   const navigate = useNavigation();
+function register() {
+  return <></>;
+}
 
-  const handleLogin = async () => {
-    try {
-      navigate();
-    } catch (error) {}
-  };
+export default function RegisterScreen() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
-        <Image
-          style={styles.logo}
-          source={{
-            uri: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Instagram_icon.png/600px-Instagram_icon.png",
-          }}
-        />
-
         <View style={styles.inputContainer}>
+          <Text style={styles.title}>Enter your data:</Text>
+          <Text style={styles.subTitle}>
+            Enter your data where you want other users to recognize you.
+          </Text>
           <TextInput
             style={styles.input}
-            placeholder="Username, email, or mobile number"
+            placeholder="Name"
+            placeholderTextColor="#808080"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Username"
+            placeholderTextColor="#808080"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
             placeholderTextColor="#808080"
           />
           <TextInput
@@ -40,21 +42,19 @@ export default function LoginScreen() {
             placeholderTextColor="#808080"
             secureTextEntry
           />
+
+          <TouchableHighlight
+            style={styles.button}
+            onPress={register}
+            underlayColor="#1491e2"
+          >
+            <Text style={styles.buttonText}>Next</Text>
+          </TouchableHighlight>
+          <Pressable style={styles.buttonRegister} onPress={register}>
+            <Text style={styles.buttonTextReg}>Sign up with Google</Text>
+          </Pressable>
         </View>
-
-        <TouchableHighlight
-          style={styles.button}
-          onPress={handleLogin}
-          underlayColor="#1491e2"
-        >
-          <Text style={styles.buttonText}>Log in</Text>
-        </TouchableHighlight>
-
-        <Text style={styles.forgotPassword}>Forgot password?</Text>
-
-        <Pressable style={styles.buttonRegister}>
-          <Text style={styles.buttonTextReg}>Create new account</Text>
-        </Pressable>
+        <Text style={styles.haveAnAccount}>I already have an account?</Text>
       </SafeAreaView>
     </SafeAreaProvider>
   );
@@ -65,10 +65,17 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f4f4f4",
     alignItems: "center",
-    justifyContent: "center",
     paddingHorizontal: 20,
+    paddingTop: 20,
   },
 
+  title: {
+    fontSize: 25,
+    paddingBottom: 5,
+  },
+  subTitle: {
+    paddingBottom: 20,
+  },
   logo: {
     width: 80,
     height: 80,
@@ -98,8 +105,6 @@ const styles = StyleSheet.create({
   },
   buttonRegister: {
     width: "100%",
-    position: "relative",
-    bottom: -130,
     borderColor: "#0095f6",
     borderRadius: 20,
     borderWidth: 1,
@@ -114,7 +119,7 @@ const styles = StyleSheet.create({
   buttonTextReg: {
     color: "#0095f6",
   },
-  forgotPassword: {
+  haveAnAccount: {
     color: "#6e6e6e",
     fontSize: 14,
   },

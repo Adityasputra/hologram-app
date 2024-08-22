@@ -44,6 +44,12 @@ const resolvers = {
         });
       }
 
+      if (checkEmail) {
+        throw new GraphQLError("Email formatted Invalid", {
+          extensions: { code: "FORMATTED_EMAIL_IS_INVALID" },
+        });
+      }
+
       const hashedPassword = await hashPassword(password);
       const newUser = {
         _id: new ObjectId(),
@@ -52,6 +58,12 @@ const resolvers = {
         email,
         password: hashedPassword,
       };
+
+      if (password.length < 5) {
+        throw new GraphQLError("Password must be min 5 char", {
+          extensions: { code: "BAD_INPUT_REQUEST" },
+        });
+      }
 
       await db.collection("users").insertOne(newUser);
 
