@@ -1,8 +1,10 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Image } from "react-native";
+
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import HomeScreen from "./HomeScreen";
 import ProfileScreen from "./ProfileScreen";
+
 const Tab = createBottomTabNavigator();
 
 export default function TabScreen() {
