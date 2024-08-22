@@ -6,18 +6,18 @@ import Fontisto from "@expo/vector-icons/Fontisto";
 const posts = Array.from({ length: 20 }).map((_, index) => ({
   id: String(index + 1),
   username: `user_${index + 1}`,
-  description: `Hello Nama saya adalah Hololive`,
+  description: `Hello, Nama saya adalah Hololive`,
   postImage: "https://embed.pixiv.net/spotlight.php?id=6822&lang=en",
   likes: Math.floor(Math.random() * 100000) + 1000,
   comments: Math.floor(Math.random() * 100) + 10,
-  caption: `Post user_${index + 1}`,
+  caption: `Post by user_${index + 1}`,
   timestamp: `Month ${index + 1}`,
 }));
 
 export default function HomeScreen() {
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={{ backgroundColor: "#fff" }}>
+      <SafeAreaView style={styles.container}>
         <FlatList
           data={posts}
           keyExtractor={(item) => item.id}
@@ -30,10 +30,12 @@ export default function HomeScreen() {
                 />
                 <Text style={styles.username}>{item.username}</Text>
               </View>
+
               <Image
                 source={{ uri: item.postImage }}
                 style={styles.postImage}
               />
+
               <View style={styles.postDetails}>
                 <View style={styles.likesContainer}>
                   <AntDesign name="hearto" size={20} color="black" />
@@ -42,6 +44,7 @@ export default function HomeScreen() {
                   <Text style={styles.likes}>{item.comments}</Text>
                   <AntDesign name="sharealt" size={20} color="black" />
                 </View>
+
                 <Text style={styles.caption}>{item.caption}</Text>
                 <Text style={styles.description}>{item.description}</Text>
                 <Text style={styles.comments}>
@@ -51,7 +54,7 @@ export default function HomeScreen() {
               </View>
             </View>
           )}
-          contentContainerStyle={styles.listContect}
+          contentContainerStyle={styles.listContent}
         />
       </SafeAreaView>
     </SafeAreaProvider>
@@ -59,8 +62,11 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    backgroundColor: "#fff",
+  },
+
   postContainer: {
-    // marginBottom: 20,
     backgroundColor: "#fff",
     borderTopWidth: 0.3,
     borderColor: "#ccc",
@@ -76,7 +82,6 @@ const styles = StyleSheet.create({
     height: 35,
     borderRadius: 40,
     marginLeft: 10,
-    paddingTop: 5,
   },
 
   username: {
@@ -88,8 +93,8 @@ const styles = StyleSheet.create({
   userInfo: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 5,
     paddingTop: 5,
+    marginBottom: 5,
   },
 
   timestamp: {
@@ -112,12 +117,16 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 
+  description: {
+    marginTop: 5,
+  },
+
   comments: {
     color: "gray",
     marginTop: 5,
   },
 
-  listContect: {
+  listContent: {
     paddingBottom: 20,
   },
 
@@ -127,10 +136,3 @@ const styles = StyleSheet.create({
     gap: 5,
   },
 });
-// centeredText: {
-//   flex: 1,
-//   justifyContent: "center",
-//   alignItems: "center",
-//   fontSize: 20,
-// },
-// });
