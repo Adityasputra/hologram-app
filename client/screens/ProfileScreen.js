@@ -121,6 +121,14 @@ export default function ProfileScreen() {
               source={{ uri: "https://via.placeholder.com/150" }}
               style={styles.postImage}
             />
+            <Image
+              source={{ uri: "https://via.placeholder.com/150" }}
+              style={styles.postImage}
+            />
+            <Image
+              source={{ uri: "https://via.placeholder.com/150" }}
+              style={styles.postImage}
+            />
           </View>
         </ScrollView>
       </SafeAreaView>
