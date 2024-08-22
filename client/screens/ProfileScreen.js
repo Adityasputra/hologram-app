@@ -4,7 +4,6 @@ import {
   Image,
   Text,
   TouchableOpacity,
-  FlatList,
   ScrollView,
 } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -57,78 +56,13 @@ export default function ProfileScreen() {
           </View>
 
           <View style={styles.postGrid}>
-            <Image
-              source={{ uri: "https://via.placeholder.com/150" }}
-              style={styles.postImage}
-            />
-            <Image
-              source={{ uri: "https://via.placeholder.com/150" }}
-              style={styles.postImage}
-            />
-            <Image
-              source={{ uri: "https://via.placeholder.com/150" }}
-              style={styles.postImage}
-            />
-            <Image
-              source={{ uri: "https://via.placeholder.com/150" }}
-              style={styles.postImage}
-            />
-            <Image
-              source={{ uri: "https://via.placeholder.com/150" }}
-              style={styles.postImage}
-            />
-            <Image
-              source={{ uri: "https://via.placeholder.com/150" }}
-              style={styles.postImage}
-            />
-            <Image
-              source={{ uri: "https://via.placeholder.com/150" }}
-              style={styles.postImage}
-            />
-            <Image
-              source={{ uri: "https://via.placeholder.com/150" }}
-              style={styles.postImage}
-            />
-            <Image
-              source={{ uri: "https://via.placeholder.com/150" }}
-              style={styles.postImage}
-            />
-            <Image
-              source={{ uri: "https://via.placeholder.com/150" }}
-              style={styles.postImage}
-            />
-            <Image
-              source={{ uri: "https://via.placeholder.com/150" }}
-              style={styles.postImage}
-            />
-            <Image
-              source={{ uri: "https://via.placeholder.com/150" }}
-              style={styles.postImage}
-            />
-            <Image
-              source={{ uri: "https://via.placeholder.com/150" }}
-              style={styles.postImage}
-            />
-            <Image
-              source={{ uri: "https://via.placeholder.com/150" }}
-              style={styles.postImage}
-            />
-            <Image
-              source={{ uri: "https://via.placeholder.com/150" }}
-              style={styles.postImage}
-            />
-            <Image
-              source={{ uri: "https://via.placeholder.com/150" }}
-              style={styles.postImage}
-            />
-            <Image
-              source={{ uri: "https://via.placeholder.com/150" }}
-              style={styles.postImage}
-            />
-            <Image
-              source={{ uri: "https://via.placeholder.com/150" }}
-              style={styles.postImage}
-            />
+            {[...Array(18)].map((_, index) => (
+              <Image
+                key={index}
+                source={{ uri: "https://via.placeholder.com/150" }}
+                style={styles.postImage}
+              />
+            ))}
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -141,54 +75,44 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
-
   headerContainer: {
     flexDirection: "row",
     padding: 15,
     alignItems: "center",
   },
-
   profileImage: {
     width: 80,
     height: 80,
     borderRadius: 40,
     marginRight: 20,
   },
-
   statsContainer: {
     alignItems: "center",
     flex: 1,
   },
-
   statsLabel: {
     color: "gray",
   },
-
   statsNumber: {
     fontSize: 18,
     fontWeight: "bold",
   },
-
   userInfoContainer: {
     paddingHorizontal: 15,
   },
-
   bio: {
     marginTop: 5,
     color: "gray",
   },
-
   username: {
     fontWeight: "bold",
     fontSize: 16,
   },
-
   actionsContainer: {
     flexDirection: "row",
     padding: 15,
     justifyContent: "space-around",
   },
-
   actionIcon: {
     padding: 8,
     backgroundColor: "#efefef",
@@ -196,7 +120,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 5,
   },
-
   actionButton: {
     flex: 1,
     padding: 8,
@@ -205,25 +128,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 5,
   },
-
   actionText: {
     fontWeight: "bold",
   },
-
   tabBar: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "center",
     paddingVertical: 10,
     borderTopWidth: 1,
     borderTopColor: "#efefef",
   },
-
   postGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 4,
+    paddingHorizontal: 1,
   },
-
   postImage: {
     width: "32%",
     height: 120,
