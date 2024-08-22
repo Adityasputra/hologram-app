@@ -2,8 +2,7 @@ import { ApolloProvider } from "@apollo/client";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 
-import HomeScreen from "./screens/HomeScreen";
-import ProfileScreen from "./screens/ProfileScreen";
+import TabScreen from "./screens/TabScreen";
 
 export default function App() {
   const Stack = createStackNavigator();
@@ -11,8 +10,13 @@ export default function App() {
     // <ApolloProvider>
     <NavigationContainer>
       <Stack.Navigator>
-        {/* <Stack.Screen name="Instagram" component={HomeScreen} /> */}
-        <Stack.Screen name="Profile" component={ProfileScreen} />
+        <Stack.Screen
+          name="Tab"
+          component={TabScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
     // </ApolloProvider>

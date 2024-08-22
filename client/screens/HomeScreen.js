@@ -24,6 +24,10 @@ export default function HomeScreen() {
           renderItem={({ item }) => (
             <View style={styles.postContainer}>
               <View style={styles.userInfo}>
+                <Image
+                  source={{ uri: "https://via.placeholder.com/100" }}
+                  style={styles.profileImage}
+                />
                 <Text style={styles.username}>{item.username}</Text>
               </View>
               <Image
@@ -32,11 +36,11 @@ export default function HomeScreen() {
               />
               <View style={styles.postDetails}>
                 <View style={styles.likesContainer}>
-                  <AntDesign name="hearto" size={22} color="black" />
+                  <AntDesign name="hearto" size={20} color="black" />
                   <Text style={styles.likes}>{item.likes}</Text>
-                  <Fontisto name="comment" size={22} color="black" />
+                  <Fontisto name="comment" size={20} color="black" />
                   <Text style={styles.likes}>{item.comments}</Text>
-                  <AntDesign name="sharealt" size={24} color="black" />
+                  <AntDesign name="sharealt" size={20} color="black" />
                 </View>
                 <Text style={styles.caption}>{item.caption}</Text>
                 <Text style={styles.description}>{item.description}</Text>
@@ -56,8 +60,10 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   postContainer: {
-    marginBottom: 20,
+    // marginBottom: 20,
     backgroundColor: "#fff",
+    borderTopWidth: 0.3,
+    borderColor: "#ccc",
   },
 
   postImage: {
@@ -65,16 +71,25 @@ const styles = StyleSheet.create({
     height: 300,
   },
 
+  profileImage: {
+    width: 35,
+    height: 35,
+    borderRadius: 40,
+    marginLeft: 10,
+    paddingTop: 5,
+  },
+
   username: {
     fontWeight: "bold",
     fontSize: 16,
-    padding: 10
+    padding: 10,
   },
 
   userInfo: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 5,
+    paddingTop: 5,
   },
 
   timestamp: {
@@ -94,6 +109,7 @@ const styles = StyleSheet.create({
 
   caption: {
     marginTop: 5,
+    fontWeight: "bold",
   },
 
   comments: {
