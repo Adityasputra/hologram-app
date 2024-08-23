@@ -1,7 +1,15 @@
-import { FlatList, View, StyleSheet, Text, Image } from "react-native";
+import {
+  FlatList,
+  View,
+  StyleSheet,
+  Text,
+  Image,
+  Pressable,
+} from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Fontisto from "@expo/vector-icons/Fontisto";
+import { useNavigation } from "@react-navigation/native";
 
 const posts = Array.from({ length: 20 }).map((_, index) => ({
   id: String(index + 1),
@@ -15,44 +23,54 @@ const posts = Array.from({ length: 20 }).map((_, index) => ({
 }));
 
 export default function HomeScreen() {
+  const navigation = useNavigation();
+
+  const handleToDetail = (post) => {
+    navigation.navigate("PostDetail", { post });
+  };
+
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
         <FlatList
           data={posts}
           keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          showsHorizontalScrollIndicator={false}
           renderItem={({ item }) => (
-            <View style={styles.postContainer}>
-              <View style={styles.userInfo}>
-                <Image
-                  source={{ uri: "https://via.placeholder.com/100" }}
-                  style={styles.profileImage}
-                />
-                <Text style={styles.username}>{item.username}</Text>
-              </View>
-
-              <Image
-                source={{ uri: item.postImage }}
-                style={styles.postImage}
-              />
-
-              <View style={styles.postDetails}>
-                <View style={styles.likesContainer}>
-                  <AntDesign name="hearto" size={20} color="black" />
-                  <Text style={styles.likes}>{item.likes}</Text>
-                  <Fontisto name="comment" size={20} color="black" />
-                  <Text style={styles.likes}>{item.comments}</Text>
-                  <AntDesign name="sharealt" size={20} color="black" />
+            <Pressable onPress={() => handleToDetail(item)}>
+              <View style={styles.postContainer}>
+                <View style={styles.userInfo}>
+                  <Image
+                    source={{ uri: "https://via.placeholder.com/100" }}
+                    style={styles.profileImage}
+                  />
+                  <Text style={styles.username}>{item.username}</Text>
                 </View>
 
-                <Text style={styles.caption}>{item.caption}</Text>
-                <Text style={styles.description}>{item.description}</Text>
-                <Text style={styles.comments}>
-                  View All {item.comments} comments
-                </Text>
-                <Text style={styles.timestamp}>{item.timestamp}</Text>
+                <Image
+                  source={{ uri: item.postImage }}
+                  style={styles.postImage}
+                />
+
+                <View style={styles.postDetails}>
+                  <View style={styles.likesContainer}>
+                    <AntDesign name="hearto" size={20} color="black" />
+                    <Text style={styles.likes}>{item.likes}</Text>
+                    <Fontisto name="comment" size={20} color="black" />
+                    <Text style={styles.likes}>{item.comments}</Text>
+                    <AntDesign name="sharealt" size={20} color="black" />
+                  </View>
+
+                  <Text style={styles.caption}>{item.caption}</Text>
+                  <Text style={styles.description}>{item.description}</Text>
+                  <Text style={styles.comments}>
+                    View All {item.comments} comments
+                  </Text>
+                  <Text style={styles.timestamp}>{item.timestamp}</Text>
+                </View>
               </View>
-            </View>
+            </Pressable>
           )}
           contentContainerStyle={styles.listContent}
         />

@@ -11,13 +11,16 @@ import {
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 export default function LoginScreen() {
-//   const navigate = useNavigation();
+  const navigate = useNavigation();
 
-  const handleLogin = async () => {
-    try {
-      navigate();
-    } catch (error) {}
-  };
+  // const handleLogin = async () => {
+  //   try {
+  //     navigate.navigate("Instagram");
+  //   } catch (error) {
+  //     console.error("Login failed:", error);
+  //   }
+  // }
+
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
@@ -44,7 +47,7 @@ export default function LoginScreen() {
 
         <TouchableHighlight
           style={styles.button}
-          onPress={handleLogin}
+          onPress={() => navigate.navigate("Tab")}
           underlayColor="#1491e2"
         >
           <Text style={styles.buttonText}>Log in</Text>
@@ -52,7 +55,10 @@ export default function LoginScreen() {
 
         <Text style={styles.forgotPassword}>Forgot password?</Text>
 
-        <Pressable style={styles.buttonRegister}>
+        <Pressable
+          style={styles.buttonRegister}
+          onPress={() => navigate.navigate("Register")}
+        >
           <Text style={styles.buttonTextReg}>Create new account</Text>
         </Pressable>
       </SafeAreaView>
@@ -68,7 +74,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 20,
   },
-
   logo: {
     width: 80,
     height: 80,
@@ -82,7 +87,6 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 50,
     borderColor: "#ccc",
-    borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 15,
     backgroundColor: "#fff",
@@ -98,13 +102,12 @@ const styles = StyleSheet.create({
   },
   buttonRegister: {
     width: "100%",
-    position: "relative",
-    bottom: -130,
     borderColor: "#0095f6",
     borderRadius: 20,
     borderWidth: 1,
     alignItems: "center",
     paddingVertical: 12,
+    marginTop: 20,
   },
   buttonText: {
     color: "#fff",
@@ -113,9 +116,11 @@ const styles = StyleSheet.create({
   },
   buttonTextReg: {
     color: "#0095f6",
+    fontWeight: "bold",
   },
   forgotPassword: {
     color: "#6e6e6e",
     fontSize: 14,
+    marginBottom: 20,
   },
 });

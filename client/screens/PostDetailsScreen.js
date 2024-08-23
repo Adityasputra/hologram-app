@@ -14,10 +14,7 @@ import Fontisto from "@expo/vector-icons/Fontisto";
 
 export default function PostDetailScreen() {
   const [comment, setComment] = useState("");
-  const [comments, setComments] = useState([
-    { id: 1, username: "user1", text: "Great Post!" },
-    { id: 2, username: "user2", text: "Great Post!" },
-  ]);
+  const [comments, setComments] = useState([]);
 
   const handleSubmitCommentar = async () => {
     if (comment.trim()) {

@@ -1,3 +1,4 @@
+import { useNavigation } from "@react-navigation/native";
 import {
   StyleSheet,
   Text,
@@ -8,11 +9,10 @@ import {
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
-function register() {
-  return <></>;
-}
+function register() {}
 
 export default function RegisterScreen() {
+  const navigate = useNavigation();
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
@@ -45,16 +45,22 @@ export default function RegisterScreen() {
 
           <TouchableHighlight
             style={styles.button}
-            onPress={register}
+            onPress={() => navigate.navigate("Login")}
             underlayColor="#1491e2"
           >
             <Text style={styles.buttonText}>Next</Text>
           </TouchableHighlight>
+
           <Pressable style={styles.buttonRegister} onPress={register}>
             <Text style={styles.buttonTextReg}>Sign up with Google</Text>
           </Pressable>
         </View>
-        <Text style={styles.haveAnAccount}>I already have an account?</Text>
+        <Text
+          style={styles.haveAnAccount}
+          onPress={() => navigate.navigate("Login")}
+        >
+          I already have an account?
+        </Text>
       </SafeAreaView>
     </SafeAreaProvider>
   );
@@ -68,28 +74,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
   },
-
+  inputContainer: {
+    width: "100%",
+    marginBottom: 15,
+  },
   title: {
     fontSize: 25,
     paddingBottom: 5,
   },
   subTitle: {
     paddingBottom: 20,
-  },
-  logo: {
-    width: 80,
-    height: 80,
-    marginBottom: 40,
-  },
-  inputContainer: {
-    width: "100%",
-    marginBottom: 15,
+    color: "#6e6e6e",
   },
   input: {
     width: "100%",
     height: 50,
     borderColor: "#ccc",
-    borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 15,
     backgroundColor: "#fff",
@@ -118,9 +118,11 @@ const styles = StyleSheet.create({
   },
   buttonTextReg: {
     color: "#0095f6",
+    fontWeight: "bold",
   },
   haveAnAccount: {
     color: "#6e6e6e",
     fontSize: 14,
+    marginTop: 20,
   },
 });

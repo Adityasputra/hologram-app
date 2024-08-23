@@ -1,11 +1,11 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Image } from "react-native";
-
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import HomeScreen from "./HomeScreen";
+
+import HomeStackScreen from "./components/HomeStackNavigator";
 import ProfileScreen from "./ProfileScreen";
-import AddPostScreen from "./AddPostScreen";
-import PostDetailScreen from "./PostDetailsScreen";
+import AddPostForm from "./AddPostScreen";
+import UserSearch from "./SearchScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -13,10 +13,11 @@ export default function TabScreen() {
   return (
     <Tab.Navigator>
       <Tab.Screen
-        name="Instagram"
-        component={HomeScreen}
+        name="Home"
+        component={HomeStackScreen}
         options={{
           tabBarShowLabel: false,
+          headerShown: false,
           tabBarIcon: () => (
             <Image
               style={{ width: 24, height: 24 }}
@@ -28,11 +29,27 @@ export default function TabScreen() {
         }}
       />
       <Tab.Screen
-        name="Post Detail"
-        component={PostDetailScreen}
+        name="Seach"
+        component={UserSearch}
         options={{
           tabBarShowLabel: false,
-          tabBarHideOnKeyboard: true,
+          headerShown: false,
+          tabBarIcon: () => (
+            <Image
+              style={{ width: 24, height: 24 }}
+              source={{
+                uri: "https://img.icons8.com/?size=100&id=7695&format=png&color=000000",
+              }}
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="SearchScreen"
+        component={AddPostForm}
+        options={{
+          tabBarShowLabel: false,
+          headerShown: false,
           tabBarIcon: () => (
             <Image
               style={{ width: 24, height: 24 }}
