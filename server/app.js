@@ -1,7 +1,9 @@
 const { ApolloServer } = require("@apollo/server");
 const { startStandaloneServer } = require("@apollo/server/standalone");
 const { connect, getDB } = require("./config/connect");
-require("dotenv").config();
+if (process.env.NODE_END !== "production") {
+  require("dotenv").config();
+}
 
 // User Schema
 const userResolvers = require("./resolvers/user");
@@ -19,6 +21,7 @@ const authentication = require("./middlewares/auth");
 const server = new ApolloServer({
   typeDefs: [userTypeDefs],
   resolvers: [userResolvers],
+  introspection: true,
 });
 
 (async () => {
