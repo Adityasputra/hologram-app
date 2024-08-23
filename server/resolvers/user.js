@@ -1,7 +1,7 @@
 const { GraphQLError } = require("graphql");
-const { hashPassword, comparedPassword } = require("../helpers/bcrytp");
 const { ObjectId } = require("mongodb");
-const { verifyToken, signInToken } = require("../helpers/tokenGenerate");
+const { hashPassword, comparedPassword } = require("../helpers/bcrytp");
+const { signInToken } = require("../helpers/tokenGenerate");
 
 const resolvers = {
   Query: {
@@ -27,8 +27,10 @@ const resolvers = {
   },
 
   Mutation: {
-    regUser: async (_, { register }, { db }) => {
-      const { name, username, email, password } = register;
+    async signUp(_, args, context) {
+      console.log("masuk");
+      const { name, username, email, password } = args.register;
+      const { db } = context;
 
       const checkUsername = await db.collection("users").findOne({ username });
       if (checkUsername) {
@@ -36,7 +38,7 @@ const resolvers = {
           extensions: { code: "USERNAME_ALREADY_TAKEN" },
         });
       }
-
+      console.log("Masuk 2");
       const checkEmail = await db.collection("users").findOne({ email });
       if (checkEmail) {
         throw new GraphQLError("Email already in use", {
@@ -44,15 +46,10 @@ const resolvers = {
         });
       }
 
-      if (checkEmail) {
-        throw new GraphQLError("Email formatted Invalid", {
-          extensions: { code: "FORMATTED_EMAIL_IS_INVALID" },
-        });
-      }
-
-      const hashedPassword = await hashPassword(password);
+      console.log("Masuk 3");
+      const hashedPassword = hashPassword(password);
+      console.log(hashPassword);
       const newUser = {
-        _id: new ObjectId(),
         name,
         username,
         email,
@@ -60,13 +57,12 @@ const resolvers = {
       };
 
       if (password.length < 5) {
-        throw new GraphQLError("Password must be min 5 char", {
+        throw new GraphQLError("Password must have at least 5 characters", {
           extensions: { code: "BAD_INPUT_REQUEST" },
         });
       }
 
       await db.collection("users").insertOne(newUser);
-
       return {
         _id: newUser._id,
         name,
@@ -74,27 +70,27 @@ const resolvers = {
         email,
       };
     },
-
-    logUser: async (_, { login }, { db }) => {
-      const { email, password } = login;
+    async signIn(_, args, context) {
+      const { email, password } = args.login;
+      const { db } = context;
 
       const user = await db.collection("users").findOne({ email });
       if (!user) {
-        throw new GraphQLError("User not found", {
+        throw new GraphQLError("User Not Found", {
           extensions: { code: "USER_NOT_FOUND" },
         });
       }
 
-      const validPassword = await comparedPassword(password, user.password);
-      if (!validPassword) {
-        throw new GraphQLError("Invalid Credentials", {
-          extensions: { code: "INVALID_CREDENTIALS" },
+      const validatePassword = await comparedPassword(password, user.password);
+      if (!validatePassword) {
+        throw new GraphQLError("Invalid Crendentials", {
+          extensions: { code: "USER_NOT_FOUND" },
         });
       }
 
       const token = signInToken({
         id: user._id,
-        username: user.username,
+        email: user.email,
       });
 
       return {

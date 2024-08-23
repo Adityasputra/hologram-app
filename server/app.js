@@ -27,7 +27,7 @@ const server = new ApolloServer({
     const db = await getDB();
 
     const { url } = await startStandaloneServer(server, {
-      listen: { port: process.env.PORT || 3000 },
+      listen: { port: process.env.PORT || 4000 },
       context: ({ req, res }) => {
         return {
           db,

@@ -11,26 +11,25 @@ const typeDefs = `#graphql
         user(id: ID!): User
     }
 
-    input Register {
-        name: String
-        username: String!
-        email: String!
-        password: String!
-    }
+   type SignInResponse {
+    token: String
+   }
 
-     type LoginRes {
-        user: User
-        token: String!
-    }
+   input SignUp {
+    name: String
+    username: String!
+    email: String!
+    password: String!
+   }
 
-    input Login {
-        email: String!
-        password: String!
-    }
+   input SignIn {
+    email: String
+    password: String 
+   }
 
     type Mutation {
-        regUser(register: Register!): User
-        logUser(login: Login!): LoginRes
+        signIn(login: SignIn!): SignInResponse
+        signUp(register: SignUp): User
     }
 `;
 
