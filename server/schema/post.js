@@ -33,7 +33,7 @@ const typeDefs = `#graphql
     type Mutation {
         addPost(input: CreatePost): Post
         commentPost(postId: ID!, content: String!): Post
-        likePost(postID: ID!): Post
+        likePost(postId: ID!): Post
     }
 `;
 

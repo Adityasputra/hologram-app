@@ -27,8 +27,9 @@ const resolvers = {
   },
 
   Mutation: {
-    async signUp(_, args, { db }) {
+    async signUp(_, args, context) {
       const { name, username, email, password } = args.register;
+      const { db } = context;
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
@@ -74,8 +75,9 @@ const resolvers = {
       };
     },
 
-    async signIn(_, args, { db }) {
+    async signIn(_, args, context) {
       const { email, password } = args.login;
+      const { db } = context;
 
       const user = await db.collection("users").findOne({ email });
       if (!user) {
