@@ -23,9 +23,17 @@ const typeDefs = `#graphql
         createdAt: String
         updatedAt: String
     }
+
+    input CreatePost {
+        content: String!
+        tags: [String]
+        imgUrl: String
+    }
     
     type Mutation {
-        createPost(addPost: addPost!) : Post
+        addPost(input: CreatePost): Post
+        commentPost(postId: ID!, content: String!): Post
+        likePost(postID: ID!): Post
     }
 `;
 

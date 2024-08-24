@@ -1,7 +1,8 @@
 const { ApolloServer } = require("@apollo/server");
 const { startStandaloneServer } = require("@apollo/server/standalone");
 const { connect, getDB } = require("./config/connect");
-if (process.env.NODE_END !== "production") {
+
+if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
 
@@ -11,16 +12,16 @@ const userTypeDefs = require("./schema/user");
 const authentication = require("./middlewares/auth");
 
 // Post Schema
-// const postResolvers = require();
-// const postTypeDefs = require("./schema/post");
+const postResolvers = require("./resolvers/post");
+const postTypeDefs = require("./schema/post");
 
 // Follow Schema
 // const followResolvers = require();
 // const followTypeDefs = require("./schema/follow");
 
 const server = new ApolloServer({
-  typeDefs: [userTypeDefs],
-  resolvers: [userResolvers],
+  typeDefs: [userTypeDefs, postTypeDefs],
+  resolvers: [userResolvers, postResolvers],
   introspection: true,
 });
 
@@ -31,7 +32,7 @@ const server = new ApolloServer({
 
     const { url } = await startStandaloneServer(server, {
       listen: { port: process.env.PORT || 4000 },
-      context: ({ req, res }) => {
+      context: async ({ req, res }) => {
         return {
           db,
           authentication: async () => await authentication(req),

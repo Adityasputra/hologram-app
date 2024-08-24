@@ -27,10 +27,15 @@ const resolvers = {
   },
 
   Mutation: {
-    async signUp(_, args, context) {
-      console.log("masuk");
+    async signUp(_, args, { db }) {
       const { name, username, email, password } = args.register;
-      const { db } = context;
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        throw new GraphQLError("Invalid email format", {
+          extensions: { code: "INVALID_EMAIL_FORMAT" },
+        });
+      }
 
       const checkUsername = await db.collection("users").findOne({ username });
       if (checkUsername) {
@@ -38,7 +43,7 @@ const resolvers = {
           extensions: { code: "USERNAME_ALREADY_TAKEN" },
         });
       }
-      console.log("Masuk 2");
+
       const checkEmail = await db.collection("users").findOne({ email });
       if (checkEmail) {
         throw new GraphQLError("Email already in use", {
@@ -46,9 +51,13 @@ const resolvers = {
         });
       }
 
-      console.log("Masuk 3");
-      const hashedPassword = hashPassword(password);
-      console.log(hashPassword);
+      if (password.length < 5) {
+        throw new GraphQLError("Password must have at least 5 characters", {
+          extensions: { code: "BAD_INPUT_REQUEST" },
+        });
+      }
+
+      const hashedPassword = await hashPassword(password);
       const newUser = {
         name,
         username,
@@ -56,23 +65,17 @@ const resolvers = {
         password: hashedPassword,
       };
 
-      if (password.length < 5) {
-        throw new GraphQLError("Password must have at least 5 characters", {
-          extensions: { code: "BAD_INPUT_REQUEST" },
-        });
-      }
-
-      await db.collection("users").insertOne(newUser);
+      const result = await db.collection("users").insertOne(newUser);
       return {
-        _id: newUser._id,
+        _id: result.insertedId,
         name,
         username,
         email,
       };
     },
-    async signIn(_, args, context) {
+
+    async signIn(_, args, { db }) {
       const { email, password } = args.login;
-      const { db } = context;
 
       const user = await db.collection("users").findOne({ email });
       if (!user) {
@@ -83,8 +86,8 @@ const resolvers = {
 
       const validatePassword = await comparedPassword(password, user.password);
       if (!validatePassword) {
-        throw new GraphQLError("Invalid Crendentials", {
-          extensions: { code: "USER_NOT_FOUND" },
+        throw new GraphQLError("Invalid Credentials", {
+          extensions: { code: "INVALID_CREDENTIALS" },
         });
       }
 
