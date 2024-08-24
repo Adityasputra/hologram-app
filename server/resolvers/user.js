@@ -5,6 +5,22 @@ const { signInToken } = require("../helpers/tokenGenerate");
 
 const resolvers = {
   Query: {
+    async searchUsers(_, args, context) {
+      const { query } = args;
+      const { db } = context;
+
+      const users = await db
+        .collection("users")
+        .find({
+          $or: [
+            { name: { $regex: query, $options: "i" } },
+            { username: { $regex: query, $options: "i" } },
+          ],
+        })
+        .toArray();
+
+      return users;
+    },
     users: async (_, __, { db }) => {
       return await db.collection("users").find().toArray();
     },
