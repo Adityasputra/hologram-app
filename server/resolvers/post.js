@@ -29,6 +29,39 @@ const resolvers = {
       const result = await db.collection("posts").insertOne(newPost);
       return { ...newPost, _id: result.insertedId };
     },
+    async commentPost(_, args, context) {
+      const { postId, content } = args;
+      const { db } = context;
+      const user = await context.authentication();
+      console.log(user);
+
+      if (!user) {
+        throw new GraphQLError("Authentication required", {
+          extensions: { code: "UNAUTHENTICATED" },
+        });
+      }
+
+      const comment = {
+        content,
+        username: user.username,
+        createdAt: new Date().toISOString(),
+      };
+
+      await db
+        .collection("posts")
+        .updateOne(
+          { _id: new ObjectId(postId) },
+          {
+            $push: { comments: comment },
+            $set: { updatedAt: new Date().toISOString() },
+          }
+        );
+
+      const post = await db
+        .collection("posts")
+        .findOne({ _id: new ObjectId(postId) });
+      return post;
+    },
   },
 };
 
