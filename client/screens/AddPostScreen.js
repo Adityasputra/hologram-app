@@ -9,12 +9,54 @@ import {
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { useMutation, gql } from "@apollo/client";
+
+const ADD_POST = gql`
+  mutation AddPost($input: CreatePostInput!) {
+    addPost(input: $input) {
+      _id
+      content
+      tags
+      imgUrl
+      authorId
+      createdAt
+      updatedAt
+    }
+  }
+`;
 
 export default function AddPostForm() {
   const [caption, setCaption] = useState("");
   const [imgUrl, setImgUrl] = useState("");
+  const [tags, setTags] = useState([]);
+  const [tagInput, setTagInput] = useState("");
+  const [addPost, { loading, error }] = useMutation(ADD_POST);
 
-  const handlePost = () => {};
+  const handleAddTag = () => {
+    if (tagInput) {
+      setTags([...tags, tagInput]);
+      setTagInput("");
+    }
+  };
+
+  const handlePost = async () => {
+    try {
+      await addPost({
+        variables: {
+          input: {
+            content: caption,
+            imgUrl,
+            tags,
+          },
+        },
+      });
+      setCaption("");
+      setImgUrl("");
+      setTags([]);
+    } catch (err) {
+      console.error("Post creation error:", err);
+    }
+  };
 
   return (
     <SafeAreaProvider>
@@ -37,14 +79,41 @@ export default function AddPostForm() {
             onChangeText={setImgUrl}
           />
 
-          <TouchableOpacity style={styles.option}>
-            <Ionicons name="pricetag-outline" size={24} color="#888" />
-            <Text style={styles.optionText}>Add Tags</Text>
-          </TouchableOpacity>
+          <View style={styles.tagContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Add a tag..."
+              value={tagInput}
+              onChangeText={setTagInput}
+              onSubmitEditing={handleAddTag}
+            />
+            <TouchableOpacity
+              style={styles.addTagButton}
+              onPress={handleAddTag}
+            >
+              <Ionicons name="add-outline" size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.tagsList}>
+            {tags.map((tag, index) => (
+              <Text key={index} style={styles.tag}>
+                {tag}
+              </Text>
+            ))}
+          </View>
 
           <TouchableOpacity style={styles.shareButton} onPress={handlePost}>
-            <Text style={styles.shareButtonText}>Share Post</Text>
+            {loading ? (
+              <Text style={styles.shareButtonText}>Posting...</Text>
+            ) : (
+              <Text style={styles.shareButtonText}>Share Post</Text>
+            )}
           </TouchableOpacity>
+
+          {error && (
+            <Text style={styles.errorText}>Error: {error.message}</Text>
+          )}
         </ScrollView>
       </SafeAreaView>
     </SafeAreaProvider>
@@ -73,24 +142,31 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderColor: "#ddd",
     fontSize: 16,
-    // shadowColor: "#000",
-    // shadowOffset: { width: 0, height: 2 },
-    // shadowOpacity: 0.1,
-    // shadowRadius: 5,
-    // elevation: 3,
   },
-  option: {
+  tagContainer: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 10,
-    borderBottomColor: "#ddd",
-    borderBottomWidth: 1,
+    marginBottom: 15,
+  },
+  addTagButton: {
+    backgroundColor: "#1DA1F2",
+    padding: 10,
+    borderRadius: 30,
+    marginLeft: 10,
+    alignItems: "center",
+  },
+  tagsList: {
+    flexDirection: "row",
+    flexWrap: "wrap",
     marginBottom: 20,
   },
-  optionText: {
-    color: "#666",
-    marginLeft: 10,
-    fontSize: 16,
+  tag: {
+    backgroundColor: "#eee",
+    color: "#333",
+    padding: 5,
+    borderRadius: 15,
+    marginRight: 5,
+    marginBottom: 5,
   },
   shareButton: {
     backgroundColor: "#1DA1F2",
@@ -108,5 +184,10 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 18,
+  },
+  errorText: {
+    color: "red",
+    marginTop: 20,
+    textAlign: "center",
   },
 });

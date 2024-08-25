@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,82 +9,80 @@ import {
   Image,
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { gql, useQuery, useMutation } from "@apollo/client";
+import debounce from "lodash.debounce";
+
+const SEARCH_USERS = gql`
+  query SearchUsers($query: String!) {
+    searchUsers(query: $query) {
+      _id
+      name
+      username
+      email
+    }
+  }
+`;
+
+const FOLLOW_USER = gql`
+  mutation FollowUser($followingId: ID!) {
+    followUser(followingId: $followingId) {
+      _id
+      followingId
+      followerId
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+const UNFOLLOW_USER = gql`
+  mutation UnfollowUser($followingId: ID!) {
+    unfollowUser(followingId: $followingId)
+  }
+`;
 
 export default function SearchScreen() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [users, setUsers] = useState([
-    {
-      id: "1",
-      name: "Nanashi Mumei",
-      followed: false,
-      profileImage: "https://embed.pixiv.net/spotlight.php?id=6822&lang=en",
-    },
-    {
-      id: "2",
-      name: "Cares Fauna",
-      followed: false,
-      profileImage: "https://embed.pixiv.net/spotlight.php?id=6822&lang=en",
-    },
-    {
-      id: "3",
-      name: "Hakos Baelz",
-      followed: false,
-      profileImage: "https://embed.pixiv.net/spotlight.php?id=6822&lang=en",
-    },
-    {
-      id: "4",
-      name: "Ouro Kronii",
-      followed: false,
-      profileImage: "https://embed.pixiv.net/spotlight.php?id=6822&lang=en",
-    },
-    {
-      id: "5",
-      name: "IRyS",
-      followed: false,
-      profileImage: "https://embed.pixiv.net/spotlight.php?id=6822&lang=en",
-    },
-    {
-      id: "6",
-      name: "Nanashi Mumei",
-      followed: false,
-      profileImage: "https://embed.pixiv.net/spotlight.php?id=6822&lang=en",
-    },
-    {
-      id: "7",
-      name: "Cares Fauna",
-      followed: false,
-      profileImage: "https://embed.pixiv.net/spotlight.php?id=6822&lang=en",
-    },
-    {
-      id: "8",
-      name: "Hakos Baelz",
-      followed: false,
-      profileImage: "https://embed.pixiv.net/spotlight.php?id=6822&lang=en",
-    },
-    {
-      id: "9",
-      name: "Ouro Kronii",
-      followed: false,
-      profileImage: "https://embed.pixiv.net/spotlight.php?id=6822&lang=en",
-    },
-    {
-      id: "10",
-      name: "IRyS",
-      followed: false,
-      profileImage: "https://embed.pixiv.net/spotlight.php?id=6822&lang=en",
-    },
-  ]);
+  const [users, setUsers] = useState([]);
 
-  const filteredUsers = users.filter((user) =>
-    user.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const { data, refetch } = useQuery(SEARCH_USERS, {
+    variables: { query: searchQuery },
+    skip: searchQuery.length < 2,
+    fetchPolicy: "network-only",
+  });
+
+  const [followUser] = useMutation(FOLLOW_USER);
+  const [unfollowUser] = useMutation(UNFOLLOW_USER);
+
+  useEffect(() => {
+    if (data && data.searchUsers) {
+      setUsers(data.searchUsers);
+    }
+  }, [data]);
+
+  const debouncedSearch = useCallback(
+    debounce((query) => {
+      refetch({ query });
+    }, 300),
+    []
   );
 
-  const toggleFollow = (id) => {
-    setUsers((prevUsers) =>
-      prevUsers.map((user) =>
-        user.id === id ? { ...user, followed: !user.followed } : user
-      )
-    );
+  const handleSearchChange = (text) => {
+    setSearchQuery(text);
+    debouncedSearch(text);
+  };
+
+  const toggleFollow = async (id, followed) => {
+    try {
+      if (followed) {
+        await unfollowUser({ variables: { followingId: id } });
+      } else {
+        await followUser({ variables: { followingId: id } });
+      }
+      refetch();
+    } catch (error) {
+      console.error("Error toggling follow:", error);
+    }
   };
 
   return (
@@ -95,11 +93,11 @@ export default function SearchScreen() {
           placeholderTextColor="#888"
           style={styles.searchInput}
           value={searchQuery}
-          onChangeText={(text) => setSearchQuery(text)}
+          onChangeText={handleSearchChange}
         />
         <FlatList
-          data={filteredUsers}
-          keyExtractor={(item) => item.id}
+          data={users}
+          keyExtractor={(item) => item._id}
           showsVerticalScrollIndicator={false}
           showsHorizontalScrollIndicator={false}
           renderItem={({ item }) => (
@@ -110,13 +108,14 @@ export default function SearchScreen() {
               />
               <View style={styles.userInfo}>
                 <Text style={styles.userName}>{item.name}</Text>
+                <Text style={styles.userUsername}>{item.username}</Text>
               </View>
               <TouchableOpacity
                 style={[
                   styles.followButton,
                   { backgroundColor: item.followed ? "#999" : "#1e90ff" },
                 ]}
-                onPress={() => toggleFollow(item.id)}
+                onPress={() => toggleFollow(item._id, item.followed)}
               >
                 <Text style={styles.followButtonText}>
                   {item.followed ? "Following" : "Follow"}
@@ -165,6 +164,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#333",
+  },
+  userUsername: {
+    fontSize: 14,
+    color: "#888",
   },
   followButton: {
     paddingVertical: 5,

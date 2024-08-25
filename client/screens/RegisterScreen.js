@@ -6,13 +6,35 @@ import {
   TextInput,
   Pressable,
   TouchableHighlight,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-
-function register() {}
+import { useMutation } from "@apollo/client";
+import { useState } from "react";
+import { REGISTER } from "../querys/mutation";
 
 export default function RegisterScreen() {
   const navigate = useNavigation();
+  const [register, { loading, error }] = useMutation(REGISTER);
+  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleRegister = async () => {
+    try {
+      const { data } = await register({
+        variables: { register: { name, username, email, password } },
+      });
+
+      if (data) {
+        navigate.navigate("Login");
+      }
+    } catch (err) {
+      console.error("Registration error:", err);
+    }
+  };
+
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
@@ -25,33 +47,48 @@ export default function RegisterScreen() {
             style={styles.input}
             placeholder="Name"
             placeholderTextColor="#808080"
+            onChangeText={(text) => setName(text)}
+            value={name}
           />
           <TextInput
             style={styles.input}
             placeholder="Username"
             placeholderTextColor="#808080"
+            onChangeText={(text) => setUsername(text)}
+            value={username}
           />
           <TextInput
             style={styles.input}
             placeholder="Email"
             placeholderTextColor="#808080"
+            onChangeText={(text) => setEmail(text)}
+            value={email}
           />
           <TextInput
             style={styles.input}
             placeholder="Password"
             placeholderTextColor="#808080"
             secureTextEntry
+            onChangeText={(text) => setPassword(text)}
+            value={password}
           />
 
           <TouchableHighlight
             style={styles.button}
-            onPress={() => navigate.navigate("Login")}
+            onPress={handleRegister}
             underlayColor="#1491e2"
           >
-            <Text style={styles.buttonText}>Next</Text>
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Register</Text>
+            )}
           </TouchableHighlight>
 
-          <Pressable style={styles.buttonRegister} onPress={register}>
+          <Pressable
+            style={styles.buttonRegister}
+            onPress={() => navigate.navigate("Login")}
+          >
             <Text style={styles.buttonTextReg}>Sign up with Google</Text>
           </Pressable>
         </View>

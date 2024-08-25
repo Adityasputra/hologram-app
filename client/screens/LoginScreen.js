@@ -7,19 +7,34 @@ import {
   TextInput,
   Pressable,
   TouchableHighlight,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { useMutation } from "@apollo/client";
+import { useContext, useState } from "react";
+import * as SecureStore from "expo-secure-store";
+import { AuthContext } from "../AuthContext";
+import { LOGIN } from "../querys/mutation";
 
-export default function LoginScreen() {
-  const navigate = useNavigation();
+export default function LoginScreen({ navigation }) {
+  const { setIsSignedIn } = useContext(AuthContext);
+  const [login, { data, loading, error }] = useMutation(LOGIN);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  // const handleLogin = async () => {
-  //   try {
-  //     navigate.navigate("Instagram");
-  //   } catch (error) {
-  //     console.error("Login failed:", error);
-  //   }
-  // }
+  const handleSubmit = async () => {
+    try {
+      const res = await login({
+        variables: { login: { email, password } },
+      });
+
+      await SecureStore.setItemAsync("access_token", res.data.signIn.token);
+      setIsSignedIn(true);
+      navigation.navigate("Tab");
+    } catch (err) {
+      console.error(err, "ERROR DI SINI <<<<<");
+    }
+  };
 
   return (
     <SafeAreaProvider>
@@ -36,28 +51,39 @@ export default function LoginScreen() {
             style={styles.input}
             placeholder="Username, email, or mobile number"
             placeholderTextColor="#808080"
+            onChangeText={(text) => setEmail(text)}
+            value={email}
           />
           <TextInput
             style={styles.input}
             placeholder="Password"
             placeholderTextColor="#808080"
-            secureTextEntry
+            secureTextEntry={true}
+            onChangeText={(text) => setPassword(text)}
+            value={password}
           />
         </View>
 
+        {error && <Text style={styles.errorText}>{error.message}</Text>}
+
         <TouchableHighlight
           style={styles.button}
-          onPress={() => navigate.navigate("Tab")}
+          onPress={handleSubmit}
+          disabled={loading}
           underlayColor="#1491e2"
         >
-          <Text style={styles.buttonText}>Log in</Text>
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Log in</Text>
+          )}
         </TouchableHighlight>
 
         <Text style={styles.forgotPassword}>Forgot password?</Text>
 
         <Pressable
           style={styles.buttonRegister}
-          onPress={() => navigate.navigate("Register")}
+          onPress={() => navigation.navigate("Register")}
         >
           <Text style={styles.buttonTextReg}>Create new account</Text>
         </Pressable>
@@ -122,5 +148,9 @@ const styles = StyleSheet.create({
     color: "#6e6e6e",
     fontSize: 14,
     marginBottom: 20,
+  },
+  errorText: {
+    color: "red",
+    marginBottom: 10,
   },
 });
