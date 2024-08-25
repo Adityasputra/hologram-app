@@ -4,12 +4,15 @@ const typeDefs = `#graphql
         name: String
         username: String!
         email: String!
+        followers: [User]
+        following: [User]
     }
 
     type Query {
         users: [User]
         user(id: ID!): User
         searchUsers( query: String!): [User]
+        getUserById(id: ID!): User
     }
 
    type SignInResponse {

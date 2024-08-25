@@ -5,6 +5,66 @@ const { signInToken } = require("../helpers/tokenGenerate");
 
 const resolvers = {
   Query: {
+    async getUserById(_, args, context) {
+      const { id } = args;
+      const { db } = context;
+
+      const user = await db
+        .collection("users")
+        .aggregate([
+          { $match: { _id: new ObjectId(id) } },
+          {
+            $lookup: {
+              from: "follows",
+              localField: "_id",
+              foreignField: "followingId",
+              as: "followers",
+            },
+          },
+          {
+            $lookup: {
+              from: "follows",
+              localField: "_id",
+              foreignField: "followerId",
+              as: "following",
+            },
+          },
+          {
+            $lookup: {
+              from: "users",
+              localField: "followers.followerId",
+              foreignField: "_id",
+              as: "followersDetails",
+            },
+          },
+          {
+            $lookup: {
+              from: "users",
+              localField: "following.followingId",
+              foreignField: "_id",
+              as: "followingDetails",
+            },
+          },
+          {
+            $project: {
+              name: 1,
+              username: 1,
+              email: 1,
+              followers: "$followersDetails",
+              following: "$followingDetails",
+            },
+          },
+        ])
+        .next();
+
+      if (!user) {
+        throw new GraphQLError("User not found", {
+          extensions: { code: "USER_NOT_FOUND" },
+        });
+      }
+
+      return user;
+    },
     async searchUsers(_, args, context) {
       const { query } = args;
       const { db } = context;
@@ -21,24 +81,26 @@ const resolvers = {
 
       return users;
     },
-    users: async (_, __, { db }) => {
-      return await db.collection("users").find().toArray();
+    async users(_, args, context) {
+      const { db } = context;
+      const users = await db.collection("users").find().toArray();
+      return users;
     },
-    user: async (_, { id }, { db }) => {
+    async user(_, args, context) {
+      const { id } = args;
+      const { db } = context;
+
       const user = await db
         .collection("users")
         .findOne({ _id: new ObjectId(id) });
+
       if (!user) {
         throw new GraphQLError("User not found", {
           extensions: { code: "USER_NOT_FOUND" },
         });
       }
-      return {
-        _id: user._id,
-        name: user.name,
-        username: user.username,
-        email: user.email,
-      };
+
+      return user;
     },
   },
 
@@ -83,12 +145,7 @@ const resolvers = {
       };
 
       const result = await db.collection("users").insertOne(newUser);
-      return {
-        _id: result.insertedId,
-        name,
-        username,
-        email,
-      };
+      return { ...newUser, _id: result.insertedId };
     },
 
     async signIn(_, args, context) {
@@ -112,6 +169,7 @@ const resolvers = {
       const token = signInToken({
         id: user._id,
         email: user.email,
+        username: user.username,
       });
 
       return {

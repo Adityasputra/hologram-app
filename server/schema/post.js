@@ -1,7 +1,7 @@
 const typeDefs = `#graphql
     type Post {
         _id: ID
-        content: String!
+        content: String
         tags: [String]
         imgUrl: String
         authorId: ID!
@@ -22,6 +22,11 @@ const typeDefs = `#graphql
         username: String!
         createdAt: String
         updatedAt: String
+    }
+
+    type Query {
+        getPosts: [Post]
+        getPostById(id: ID!): Post
     }
 
     input CreatePost {

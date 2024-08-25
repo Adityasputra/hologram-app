@@ -6,6 +6,11 @@ const typeDefs = `#graphql
         createdAt: String
         updatedAt: String
     }
+
+    type Mutation {
+        followUser(followingId: ID!): Follow
+        unfollowUser(followingId: ID!): String
+    }
 `;
 
 module.exports = typeDefs;

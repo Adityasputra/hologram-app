@@ -2,6 +2,92 @@ const { GraphQLError } = require("graphql");
 const { ObjectId } = require("mongodb");
 
 const resolvers = {
+  Query: {
+    async getPosts(_, args, context) {
+      const { db } = context;
+
+      const posts = await db
+        .collection("posts")
+        .aggregate([
+          {
+            $lookup: {
+              from: "users",
+              localField: "authorId",
+              foreignField: "_id",
+              as: "author",
+            },
+          },
+          {
+            $unwind: "$author",
+          },
+          {
+            $project: {
+              _id: 1,
+              content: 1,
+              tags: 1,
+              imgUrl: 1,
+              authorId: 1,
+              createdAt: 1,
+              updatedAt: 1,
+              "author.username": 1,
+              "author.name": 1,
+            },
+          },
+        ])
+        .toArray();
+
+      console.log(posts);
+      return posts.map((post) => ({
+        ...post,
+        author: post.author.username,
+      }));
+    },
+    async getPostById(_, args, context) {
+      const { id } = args;
+      const { db } = context;
+
+      const post = await db
+        .collection("posts")
+        .aggregate([
+          {
+            $match: { _id: new ObjectId(id) },
+          },
+          {
+            $lookup: {
+              from: "users",
+              localField: "authorId",
+              foreignField: "_id",
+              as: "author",
+            },
+          },
+          {
+            $unwind: "$author",
+          },
+          {
+            $project: {
+              _id: 1,
+              content: 1,
+              tags: 1,
+              imgUrl: 1,
+              authorId: 1,
+              createdAt: 1,
+              updatedAt: 1,
+              "author.username": 1,
+              "author.name": 1,
+            },
+          },
+        ])
+        .toArray();
+
+        console.log(post);
+      return post[0]
+        ? {
+            ...post[0],
+            author: post[0].author.username,
+          }
+        : null;
+    },
+  },
   Mutation: {
     async addPost(_, args, context) {
       const { input } = args;

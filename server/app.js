@@ -16,12 +16,12 @@ const postResolvers = require("./resolvers/post");
 const postTypeDefs = require("./schema/post");
 
 // Follow Schema
-// const followResolvers = require();
-// const followTypeDefs = require("./schema/follow");
+const followResolvers = require("./resolvers/follow");
+const followTypeDefs = require("./schema/follow");
 
 const server = new ApolloServer({
-  typeDefs: [userTypeDefs, postTypeDefs],
-  resolvers: [userResolvers, postResolvers],
+  typeDefs: [userTypeDefs, postTypeDefs, followTypeDefs],
+  resolvers: [userResolvers, postResolvers, followResolvers],
   introspection: true,
 });
 

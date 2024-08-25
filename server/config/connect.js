@@ -1,7 +1,12 @@
 const { MongoClient } = require("mongodb");
-const uri = "mongodb+srv://aditsputracv:sG8b87hOUBIbAGnX@test-database.m424j.mongodb.net/?retryWrites=true&w=majority&appName=test-database";
+require("dotenv").config();
+const uri = process.env.DB_PW;
 
-const client = new MongoClient(uri);
+const client = new MongoClient(uri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
 async function connect() {
   try {
     client.db("ig-db-project");
