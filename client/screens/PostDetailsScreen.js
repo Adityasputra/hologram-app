@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -9,14 +9,12 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import AntDesign from "@expo/vector-icons/AntDesign";
-import Fontisto from "@expo/vector-icons/Fontisto";
-import { gql, useQuery } from "@apollo/client";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useQuery, useMutation, gql } from "@apollo/client";
 
 const GET_POST_BY_ID = gql`
   query GetPostById($postId: ID!) {
-    getPostById(postId: $postId) {
+    getPostById(id: $postId) {
       _id
       content
       tags
@@ -26,13 +24,22 @@ const GET_POST_BY_ID = gql`
         content
         username
         createdAt
-        updatedAt
       }
       likes {
         username
         createdAt
-        updatedAt
       }
+      createdAt
+    }
+  }
+`;
+
+const COMMENT_POST = gql`
+  mutation CommentPost($postId: ID!, $content: String!) {
+    commentPost(postId: $postId, content: $content) {
+      _id
+      authorId
+      content
       createdAt
       updatedAt
     }
@@ -42,87 +49,111 @@ const GET_POST_BY_ID = gql`
 export default function PostDetailScreen({ route }) {
   const { postId } = route.params;
   const [comment, setComment] = useState("");
-  const { data, loading, error } = useQuery(GET_POST_BY_ID, {
+  const { data, loading, error, refetch } = useQuery(GET_POST_BY_ID, {
     variables: { postId },
+  });
+
+  const [commentPost, { loading: commentLoading }] = useMutation(COMMENT_POST, {
+    onCompleted: () => {
+      setComment("");
+      refetch();
+    },
+    onError: (err) => {
+      console.error("Error posting comment:", err.message);
+    },
   });
 
   const handleSubmitComment = async () => {
     if (comment.trim()) {
-      console.log("Submitting comment:", comment);
-      setComment("");
+      try {
+        await commentPost({
+          variables: { postId, content: comment },
+        });
+      } catch (err) {
+        console.error("Error submitting comment:", err.message);
+      }
     }
   };
 
   if (loading) {
     return (
-      <SafeAreaProvider>
-        <SafeAreaView style={styles.container}>
-          <ActivityIndicator size="large" color="#000" />
-        </SafeAreaView>
-      </SafeAreaProvider>
+      <SafeAreaView style={styles.container}>
+        <ActivityIndicator size="large" color="#000" />
+      </SafeAreaView>
     );
   }
 
   if (error) {
+    console.error("Error fetching post details:", error.message);
     return (
-      <SafeAreaProvider>
-        <SafeAreaView style={styles.container}>
-          <Text>Error fetching post details</Text>
-        </SafeAreaView>
-      </SafeAreaProvider>
+      <SafeAreaView style={styles.container}>
+        <Text>Error fetching post details: {error.message}</Text>
+      </SafeAreaView>
     );
   }
 
   const post = data?.getPostById;
 
-  return (
-    <SafeAreaProvider>
+  if (!post) {
+    return (
       <SafeAreaView style={styles.container}>
-        <ScrollView contentContainerStyle={styles.scrollViewContent}>
-          <Image source={{ uri: post.imgUrl }} style={styles.postImage} />
-
-          <View style={styles.postDetails}>
-            <View style={styles.likesContainer}>
-              <AntDesign name="hearto" size={20} color="black" />
-              <Text style={styles.likes}>{post.likes.length}</Text>
-              <Fontisto name="comment" size={20} color="black" />
-              <Text style={styles.likes}>{post.comments.length}</Text>
-              <AntDesign name="sharealt" size={20} color="black" />
-            </View>
-          </View>
-
-          <View style={styles.captionContainer}>
-            <Text style={styles.captionUs}>
-              <Text style={styles.username}>{post.authorId}</Text>
-            </Text>
-            <Text style={styles.captionText}>{post.content}</Text>
-            <Text style={styles.tags}>{post.tags.join(", ")}</Text>
-          </View>
-
-          <View style={styles.commentsSection}>
-            <Text style={styles.commentsHeader}>Comments:</Text>
-            {post.comments.map((comment, index) => (
-              <View key={index} style={styles.comment}>
-                <Text style={styles.commentUsername}>{comment.username}:</Text>
-                <Text style={styles.commentContent}>{comment.content}</Text>
-              </View>
-            ))}
-          </View>
-
-          <View style={styles.commentInputContainer}>
-            <TextInput
-              style={styles.commentInput}
-              value={comment}
-              onChangeText={setComment}
-              placeholder="Add a comment..."
-            />
-            <TouchableOpacity onPress={handleSubmitComment}>
-              <Text style={styles.submitButton}>Post</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
+        <Text>No post found</Text>
       </SafeAreaView>
-    </SafeAreaProvider>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+        <Image source={{ uri: post.imgUrl }} style={styles.postImage} />
+
+        <View style={styles.postDetails}>
+          <View style={styles.likesContainer}>
+            <Text style={styles.likes}>{post.likes?.length || 0} Likes</Text>
+            <Text style={styles.comments}>
+              {post.comments?.length || 0} Comments
+            </Text>
+          </View>
+
+          <Text style={styles.caption}>
+            <Text style={styles.username}>{post.authorId}</Text>
+            {` ${post.content}`}
+          </Text>
+          <Text style={styles.tags}>{post.tags?.join(", ")}</Text>
+          <Text style={styles.timestamp}>
+            {new Date(post.createdAt).toLocaleDateString()}
+          </Text>
+        </View>
+
+        <View style={styles.commentsSection}>
+          <Text style={styles.commentsHeader}>Comments:</Text>
+          {post.comments?.map((comment, index) => (
+            <View key={index} style={styles.comment}>
+              <Text style={styles.commentUsername}>{comment.username}:</Text>
+              <Text style={styles.commentContent}>{comment.data.content}</Text>
+            </View>
+          ))}
+        </View>
+
+        <View style={styles.commentInputContainer}>
+          <TextInput
+            style={styles.commentInput}
+            value={comment}
+            onChangeText={setComment}
+            placeholder="Add a comment..."
+            editable={!commentLoading}
+          />
+          <TouchableOpacity
+            onPress={handleSubmitComment}
+            disabled={commentLoading}
+          >
+            <Text style={styles.submitButton}>
+              {commentLoading ? "Posting..." : "Post"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -149,23 +180,22 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     paddingRight: 5,
   },
-  captionContainer: {
-    padding: 10,
+  comments: {
+    color: "gray",
+    marginLeft: 10,
   },
-  captionUs: {
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  username: {
-    fontWeight: "bold",
-  },
-  captionText: {
+  caption: {
     marginTop: 5,
-    fontSize: 16,
+    fontWeight: "bold",
   },
   tags: {
     marginTop: 5,
     fontStyle: "italic",
+  },
+  timestamp: {
+    color: "gray",
+    fontSize: 12,
+    marginTop: 5,
   },
   commentsSection: {
     padding: 10,
