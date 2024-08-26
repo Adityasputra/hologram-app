@@ -29,14 +29,15 @@ const typeDefs = `#graphql
         getPostById(id: ID!): Post
     }
 
-    input CreatePost {
+    input CreatePostInput {
         content: String!
         tags: [String]
         imgUrl: String
     }
+
     
     type Mutation {
-        addPost(input: CreatePost): Post
+        addPost(input: CreatePostInput): Post
         commentPost(postId: ID!, content: String!): Post
         likePost(postId: ID!): Post
     }

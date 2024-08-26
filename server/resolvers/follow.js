@@ -40,7 +40,6 @@ const resolvers = {
         createdAt: newFollow.createdAt,
         updatedAt: newFollow.updatedAt,
       };
-    //   return updatedUser;
     },
     async unfollowUser(_, args, context) {
       const { followingId } = args;

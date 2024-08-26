@@ -1,10 +1,15 @@
 const { GraphQLError } = require("graphql");
 const { ObjectId } = require("mongodb");
+const redis = require("../config/redis");
 
 const resolvers = {
   Query: {
     async getPosts(_, args, context) {
       const { db } = context;
+      const cachedPosts = await redis.get("posts");
+      if (cachedPosts) {
+        return JSON.parse(cachedPosts);
+      }
 
       const posts = await db
         .collection("posts")
@@ -19,6 +24,9 @@ const resolvers = {
           },
           {
             $unwind: "$author",
+          },
+          {
+            $sort: { createdAt: -1 },
           },
           {
             $project: {
@@ -36,6 +44,8 @@ const resolvers = {
         ])
         .toArray();
 
+      await redis.set("posts", JSON.stringify(posts), "EX", 3600);
+
       console.log(posts);
       return posts.map((post) => ({
         ...post,
@@ -45,6 +55,11 @@ const resolvers = {
     async getPostById(_, args, context) {
       const { id } = args;
       const { db } = context;
+
+      const cachedPost = await redis.get(`post:${id}`);
+      if (cachedPost) {
+        return JSON.parse(cachedPost);
+      }
 
       const post = await db
         .collection("posts")
@@ -79,7 +94,9 @@ const resolvers = {
         ])
         .toArray();
 
-        console.log(post);
+      await redis.set(`post:${id}`, JSON.stringify(post[0]), "EX", 3600);
+
+      console.log(post);
       return post[0]
         ? {
             ...post[0],
@@ -112,6 +129,7 @@ const resolvers = {
       };
 
       const result = await db.collection("posts").insertOne(newPost);
+      await redis.del("posts");
       return { ...newPost, _id: result.insertedId };
     },
     async commentPost(_, args, context) {
@@ -143,6 +161,7 @@ const resolvers = {
       const post = await db
         .collection("posts")
         .findOne({ _id: new ObjectId(postId) });
+      await redis.del("posts");
       return post;
     },
     async likePost(_, args, context) {
@@ -165,35 +184,30 @@ const resolvers = {
       const post = await db
         .collection("posts")
         .findOne({ _id: new ObjectId(postId) });
+      if (!post) {
+        throw new GraphQLError("Post not found", {
+          extensions: { code: "NOT_FOUND" },
+        });
+      }
 
-      console.log(post, "<==== Post Like");
-      console.log(like, "<< this like");
       const alreadyLiked = post.likes.some(
-        (like) => like.username === user.username,
-        console.log(like.username, "<<<< Like"),
-        console.log(user.username, "<<<<< User")
+        (like) => like.username === user.username
       );
-
       if (alreadyLiked) {
-        throw new GraphQLError("You already Likes this post", {
+        throw new GraphQLError("You already liked this post", {
           extensions: { code: "BAD_INPUT_REQUEST" },
         });
       }
 
-      await db.collection("posts").updateOne(
-        { _id: new ObjectId(postId) },
-        {
-          $push: {
-            likes: like,
-          },
-        }
-      );
+      await db
+        .collection("posts")
+        .updateOne({ _id: new ObjectId(postId) }, { $push: { likes: like } });
 
-      const likePost = await db
+      const updatedPost = await db
         .collection("posts")
         .findOne({ _id: new ObjectId(postId) });
-
-      return likePost;
+      await redis.del("posts");
+      return updatedPost;
     },
   },
 };
