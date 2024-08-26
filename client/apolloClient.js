@@ -3,7 +3,7 @@ import { setContext } from "@apollo/client/link/context";
 import * as SecureStore from "expo-secure-store";
 
 const httpLink = createHttpLink({
-  uri: "https://instagram-clone-app.delizioso.my.id/",
+  uri: "https://holo-app.delizioso.my.id/",
   // uri: "https://2d1e-114-5-104-234.ngrok-free.app",
 });
 
